@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Should I Water My Garden?</title>
+    <style>
+        /* ---------- GLOBAL STYLES ---------- */
+        body {
+            font-family: "Segoe UI", Arial, sans-serif;
+            max-width: 700px;
+            margin: 40px auto;
+            padding: 20px;
+            background: linear-gradient(180deg, #f3faf7 0%, #e8f3ef 100%);
+            line-height: 1.6;
+            color: #2b3a33;
+        }
+
+        h1 {
+            color: #2a6f97;
+            text-align: center;
+            font-size: 2.2em;
+            margin-bottom: 10px;
+        }
+
+        h1::before {
+            content: "🌱 ";
+        }
+
+        button {
+            padding: 10px 20px;
+            margin: 10px 5px;
+            border: none;
+            background: #2a6f97;
+            color: white;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: transform 0.1s ease, background 0.2s ease;
+        }
+
+        button:hover {
+            background: #245b7d;
+            transform: translateY(-2px);
+        }
+
+        /* ---------- SECTION CARDS ---------- */
+        .section {
+            padding: 24px;
+            margin-bottom: 30px;
+            border-radius: 12px;
+            background: #ffffffcc;
+            backdrop-filter: blur(4px);
+            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+        }
+
+        .section-input {
+            background: #e9f5f0;
+            border: 1px solid #c7ddd5;
+        }
+
+        .section-divider {
+            height: 1px;
+            background: #c8d6d0;
+            margin: 35px 0;
+        }
+
+        /* ---------- AUTOCOMPLETE ---------- */
+        #suggestions div {
+            padding: 8px;
+            cursor: pointer;
+        }
+        #suggestions div:hover {
+            background: #eef;
+        }
+
+        /* ---------- TIMELINE ---------- */
+        .timeline-container {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 15px;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .timeline-box {
+            width: 70px;
+            height: 80px;
+            background: #ffffff;
+            border: 1px solid #d0d0d0;
+            border-radius: 8px;
+            text-align: center;
+            padding-top: 10px;
+            font-size: 26px;
+            transition: transform 0.1s ease;
+        }
+
+        .timeline-box:hover {
+            transform: translateY(-3px);
+        }
+
+        .timeline-today {
+            border: 2px solid #2a6f97;
+            background: #e8f1f7;
+        }
+
+        .timeline-label {
+            font-size: 11px;
+            margin-top: 4px;
+        }
+
+        /* ---------- RESULT ---------- */
+        #result {
+            margin-top: 20px;
+            font-size: 1.5em;
+            text-align: center;
+        }
+
+        .yes {
+            color: #2e7d32;
+            font-weight: bold;
+        }
+
+        .no {
+            color: #c62828;
+            font-weight: bold;
+        }
+
+        /* ---------- ACCORDION ---------- */
+        .accordion {
+            background-color: #e6e6e6;
+            color: #333;
+            cursor: pointer;
+            padding: 14px;
+            width: 100%;
+            border: none;
+            text-align: left;
+            outline: none;
+            font-size: 17px;
+            border-radius: 8px;
+            margin-top: 20px;
+            transition: background 0.2s ease;
+        }
+
+        .accordion:hover {
+            background-color: #d8d8d8;
+        }
+
+        .accordion:after {
+            content: '+';
+            float: right;
+            font-weight: bold;
+        }
+
+        .accordion.active:after {
+            content: '-';
+        }
+
+        .panel {
+            padding: 0 15px;
+            background-color: #ffffff;
+            display: none;
+            overflow: hidden;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            margin-top: 8px;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ---------- MOBILE ---------- */
+        @media (max-width: 500px) {
+            .timeline-box {
+                width: 60px;
+                height: 70px;
+                font-size: 22px;
+            }
+            .city-wrapper {
+                width: 100% !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Should I Water My Garden?</h1>
+
+    <!-- INPUT SECTION -->
+    <div class="section section-input">
+
+        <p><strong>Enter your city or town:</strong></p>
+
+        <div class="city-wrapper" style="position: relative; width: 80%; margin: 0 auto;">
+            <input id="cityInput"
+                   type="text"
+                   placeholder="e.g., Sherbrooke"
+                   oninput="fetchSuggestions()"
+                   style="padding:10px; width:100%; border-radius:6px; border:1px solid #bbb;">
+
+            <div id="suggestions"
+                 style="position:absolute;
+                        top:42px;
+                        left:0;
+                        background:white;
+                        border:1px solid #ccc;
+                        width:100%;
+                        max-height:150px;
+                        overflow-y:auto;
+                        display:none;
+                        z-index:10;">
+            </div>
+        </div>
+
+        <div id="locationStatus" style="margin-top:15px; font-weight:bold; text-align:center;"></div>
+
+        <hr style="margin:30px 0;">
+
+        <p><strong>When did you last water your garden?</strong></p>
+        <div style="text-align:center;">
+            <button onclick="checkWater(0)">Today</button>
+            <button onclick="checkWater(1)">Yesterday</button>
+            <button onclick="checkWater(2)">Day before yesterday</button>
+            <button onclick="checkWater(3)">Earlier</button>
+        </div>
+
+    </div>
+
+    <div class="section-divider"></div>
+
+    <!-- RESULTS SECTION -->
+    <div class="section">
+        <div id="result"></div>
+        <div id="timeline" style="margin-top:25px;"></div>
+    </div>
+
+    <div class="section-divider"></div>
+
+    <!-- ACCORDIONS -->
+    <button class="accordion">Show detailed breakdown</button>
+    <div class="panel">
+        <div id="breakdown" style="padding: 15px 0;"></div>
+    </div>
+
+    <button class="accordion">About this project</button>
+    <div class="panel">
+        <div style="padding: 15px 0;">
+            This little tool was born out of pure laziness. I kept forgetting to check the weather,
+            assumed the garden would “figure it out,” and eventually watched all my tomatoes shrivel
+            into tragic little raisin‑tomatoes. So now the website does the thinking for me.
+        </div>
+    </div>
+
+    <button class="accordion">More info</button>
+    <div class="panel">
+        <div style="padding: 15px 0;">
+            <p><strong>How this tool works:</strong></p>
+            <p>
+                • Any day with <strong>5 mm or more rain</strong> is treated as a “watering event,” since that’s roughly
+                equivalent to a light hand‑watering.<br>
+                • The tool aims for a total of <strong>25–50 mm of water per week</strong> (from rain + watering), which is a
+                common guideline for most vegetables, flowers, and lawns.<br>
+                • If the soil has been dry for several days and rainfall has been low, the tool leans toward watering.
+                If rain is expected soon, it leans against watering.<br>
+                • Hot, sunny days increase water loss, so the tool becomes more cautious when strong sun and high
+                temperatures are forecast.
+            </p>
+
+            <p><strong>Growing season logic:</strong></p>
+            <p>
+                • The tool checks whether temperatures are consistently above <strong>10°C</strong>, which is the threshold
+                for active plant growth.<br>
+                • In tropical regions (within ~23° latitude), the growing season is considered year‑round.<br>
+                • In temperate regions, the season automatically adjusts based on recent and upcoming temperatures.
+            </p>
+
+            <p><strong>Weather data source:</strong></p>
+            <p>
+                All weather data (past and forecast) is provided by the excellent
+                <a href="https://open-meteo.com" target="_blank">Open‑Meteo API</a>, a free and open weather service.
+            </p>
+
+            <p><strong>Disclaimer:</strong></p>
+            <p>
+                These results are estimates based on weather data and simple heuristics — always use your own judgement when caring for your plants.
+            </p>
+        </div>
+    </div>
+
+    <script>
+        let userLat = null;
+        let userLon = null;
+
+        /* AUTOCOMPLETE */
+        async function fetchSuggestions() {
+            const query = document.getElementById("cityInput").value.trim();
+            const suggestionsBox = document.getElementById("suggestions");
+
+            if (query.length < 2) {
+                suggestionsBox.style.display = "none";
+                return;
+            }
+
+            const url = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(query)}&count=10`;
+            const response = await fetch(url);
+            const data = await response.json();
+
+            if (!data.results) {
+                suggestionsBox.style.display = "none";
+                return;
+            }
+
+            suggestionsBox.innerHTML = "";
+            suggestionsBox.style.display = "block";
+
+            data.results.forEach(place => {
+                const item = document.createElement("div");
+                item.textContent = `${place.name}${place.admin1 ? ", " + place.admin1 : ""}, ${place.country}`;
+
+                item.onclick = () => {
+                    document.getElementById("cityInput").value = place.name;
+                    userLat = place.latitude;
+                    userLon = place.longitude;
+
+                    document.getElementById("locationStatus").textContent =
+                        `Location set: ${place.name}, ${place.country}`;
+
+                    suggestionsBox.style.display = "none";
+                };
+
+                suggestionsBox.appendChild(item);
+            });
+        }
+
+        /* TIMELINE ICONS */
+        function getIconForDay(rain, sun, rainProb) {
+            if (rain > 5) return "🌧️";
+            if (rainProb > 50) return "🌦️";
+            if (sun > 4 * 3600) return "☀️";
+            if (sun > 1 * 3600) return "⛅";
+            return "☁️";
+        }
+
+        function renderTimeline(data) {
+            const timelineDiv = document.getElementById("timeline");
+            timelineDiv.innerHTML = "<strong>7‑day weather overview:</strong>";
+
+            const container = document.createElement("div");
+            container.className = "timeline-container";
+
+            for (let i = 0; i < 7; i++) {
+                const rain = data.daily.precipitation_sum[i];
+                const sun = data.daily.sunshine_duration[i];
+                const rainProb = data.daily.precipitation_probability_max[i];
+
+                const icon = getIconForDay(rain, sun, rainProb);
+
+                const box = document.createElement("div");
+                box.className = "timeline-box";
+
+                if (i === 3) box.classList.add("timeline-today");
+
+                const label =
+                    i === 3
+                        ? "Today"
+                        : (i < 3 ? `${3 - i}d ago` : `+${i - 3}d`);
+
+                box.innerHTML = `
+                    ${icon}
+                    <div class="timeline-label">${label}</div>
+                `;
+
+                container.appendChild(box);
+            }
+
+            timelineDiv.appendChild(container);
+        }
+
+        /* MAIN LOGIC */
+        async function checkWater(lastWateredDays) {
+            const resultDiv = document.getElementById("result");
+            const breakdownDiv = document.getElementById("breakdown");
+
+            if (!userLat || !userLon) {
+                resultDiv.textContent = "Please select your city/town first.";
+                return;
+            }
+
+            resultDiv.textContent = "Checking weather data...";
+            breakdownDiv.textContent = "";
+            document.getElementById("timeline").innerHTML = "";
+
+            const url = `https://api.open-meteo.com/v1/forecast?latitude=${userLat}&longitude=${userLon}&hourly=precipitation,temperature_2m,sunshine_duration&daily=precipitation_sum,precipitation_probability_max,temperature_2m_max,sunshine_duration&past_days=5&forecast_days=5`;
+
+            const response = await fetch(url);
+            const data = await response.json();
+
+            renderTimeline(data);
+
+            const hemisphere = userLat >= 0 ? "north" : "south";
+
+            const pastTemps = data.daily.temperature_2m_max.slice(0, 5);
+            const futureTemps = data.daily.temperature_2m_max.slice(3, 8);
+
+            const warmEnough = arr => arr.every(t => t > 10);
+            const tropical = Math.abs(userLat) <= 23;
+
+            let inGrowingSeason = true;
+
+            if (!tropical) {
+                const pastWarm = warmEnough(pastTemps);
+                const futureWarm = warmEnough(futureTemps);
+                inGrowingSeason = pastWarm || futureWarm;
+            }
+
+            if (!inGrowingSeason) {
+                resultDiv.innerHTML = `<strong class="no">No</strong>, your garden does not need water right now.`;
+                breakdownDiv.innerHTML = `
+                    <strong>Growing season:</strong> No<br>
+                    <strong>Latitude:</strong> ${userLat.toFixed(2)}° (${hemisphere} hemisphere)<br>
+                    <strong>Recent max temperatures:</strong> ${pastTemps.map(t => t + "°C").join(", ")}<br>
+                    <br>
+                    Plants are dormant and water needs are minimal.
+                `;
+                return;
+            }
+
+            const rainLast3Days = data.daily.precipitation_sum.slice(0, 3).reduce((a, b) => a + b, 0);
+
+            let effectiveLastWatered = lastWateredDays;
+            if (data.daily.precipitation_sum[0] >= 5) effectiveLastWatered = 0;
+            else if (data.daily.precipitation_sum[1] >= 5) effectiveLastWatered = 1;
+
+            const next3RainProb = data.daily.precipitation_probability_max.slice(3, 6);
+            const next3Sun = data.daily.sunshine_duration.slice(3, 6);
+            const next3Temp = data.daily.temperature_2m_max.slice(3, 6);
+
+            const rainComing = next3RainProb.some(p => p > 50);
+            const sunnyHot = next3Sun.some(s => s > 6 * 3600) && next3Temp.some(t => t > 25);
+
+            let shouldWater = false;
+
+            if (effectiveLastWatered <= 1) {
+                shouldWater = false;
+            } else {
+                if (rainLast3Days < 10) {
+                    shouldWater = true;
+                } else if (rainLast3Days < 20 && sunnyHot) {
+                    shouldWater = true;
+                }
+
+                if (rainComing) {
+                    shouldWater = false;
+                }
+            }
+
+            resultDiv.innerHTML = shouldWater
+                ? `<strong class="yes">Yes</strong>, your garden probably needs water.`
+                : `<strong class="no">No</strong>, your garden should be fine.`;
+
+            breakdownDiv.innerHTML = `
+                <strong>Growing season:</strong> Yes<br>
+                <strong>Rain last 3 days:</strong> ${rainLast3Days.toFixed(1)} mm<br>
+                <strong>Last watering event (including rain):</strong> ${effectiveLastWatered} days ago<br>
+                <strong>Rain expected soon:</strong> ${rainComing ? "Yes" : "No"}<br>
+                <strong>Hot & sunny ahead:</strong> ${sunnyHot ? "Yes" : "No"}<br><br>
+
+                <strong>Temperature details:</strong><br>
+                • Past max temperatures: ${pastTemps.map(t => t + "°C").join(", ")}<br>
+                • Next max temperatures: ${next3Temp.map(t => t + "°C").join(", ")}<br><br>
+
+                <strong>Rain & sun details:</strong><br>
+                • Next rain probabilities: ${next3RainProb.join("%, ")}%<br>
+                • Sunshine next days: ${next3Sun.map(s => (s/3600).toFixed(1) + "h").join(", ")}<br>
+            `;
+        }
+
+        /* ACCORDION BEHAVIOR */
+        document.addEventListener("click", function(e) {
+            if (e.target.classList.contains("accordion")) {
+                e.target.classList.toggle("active");
+                const panel = e.target.nextElementSibling;
+                panel.style.display = panel.style.display === "block" ? "none" : "block";
+            }
+        });
+    </script>
+</body>
+</html>
