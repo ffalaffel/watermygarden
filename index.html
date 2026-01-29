@@ -42,6 +42,28 @@
             transform: translateY(-2px);
         }
 
+        /* ---------- BUY ME A COFFEE BUTTON ---------- */
+        .coffee-btn {
+            display: inline-block;
+            background: #b87333;
+            color: white;
+            padding: 12px 22px;
+            border-radius: 8px;
+            font-size: 1.1em;
+            text-decoration: none;
+            transition: transform 0.15s ease, background 0.2s ease;
+            margin: 0 auto;
+        }
+
+        .coffee-btn:hover {
+            background: #a5672d;
+            transform: translateY(-3px);
+        }
+
+        .coffee-btn span {
+            margin-right: 6px;
+        }
+
         /* ---------- SECTION CARDS ---------- */
         .section {
             padding: 24px;
@@ -237,6 +259,13 @@
 
     <div class="section-divider"></div>
 
+    <!-- BUY ME A COFFEE BUTTON -->
+    <div style="text-align:center; margin-bottom: 10px;">
+        <a class="coffee-btn" href="https://buymeacoffee.com/ffalaffel" target="_blank">
+            <span>☕</span>Buy me a coffee!
+        </a>
+    </div>
+
     <!-- ACCORDIONS -->
     <button class="accordion">Show detailed breakdown</button>
     <div class="panel">
@@ -248,7 +277,8 @@
         <div style="padding: 15px 0;">
             This little tool was born out of pure laziness. I kept forgetting to check the weather,
             assumed the garden would “figure it out,” and eventually watched all my tomatoes shrivel
-            into tragic little raisin‑tomatoes. So now the website does the thinking for me.
+            into tragic little raisin‑tomatoes. So now the website does the thinking for me, and now 
+            my tomatoes can die via squirrel instead.
         </div>
     </div>
 
@@ -283,7 +313,7 @@
 
             <p><strong>Disclaimer:</strong></p>
             <p>
-                These results are estimates based on weather data and simple heuristics — always use your own judgement when caring for your plants.
+                These results are estimates based on weather data and simple heuristics. Always use your own judgement when caring for your plants.
             </p>
         </div>
     </div>
